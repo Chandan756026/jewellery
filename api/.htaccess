@@ -1,0 +1,14 @@
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Never serve source, scripts, SQL or seed files directly
+  RewriteRule ^(src|bin|migrations|seed)(/|$) - [F,L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+<FilesMatch "^\.env|\.sql$|\.md$">
+  Require all denied
+</FilesMatch>

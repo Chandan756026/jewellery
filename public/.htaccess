@@ -1,0 +1,10 @@
+# For Apache hosting of the built site (npm run build copies this into dist/).
+# Sends page routes such as /admin/login to the React app, but never touches the API or uploaded files.
+# If the site lives in a sub-folder (e.g. /ckg/jewellery/), add:  RewriteBase /ckg/jewellery/  and build with  --base=/ckg/jewellery/
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{REQUEST_URI} !^/(api|uploads)/
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>

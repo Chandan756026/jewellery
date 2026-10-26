@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "necklace", "name": "The Necklace", "kind": "Necklace", "tagline": "Grace, in every curve.",
+    "description": "A delicate rhythm of ornament. A beautiful beginning to your own story.",
+    "details": "Crescent filigree with leaf motifs\nBeaded edge and teardrop pendant\nFine gold chain",
+    "image": "necklace.webp"
+  },
+  {
+    "slug": "earrings", "name": "The Earrings", "kind": "Earrings", "tagline": "A little light. A lasting glow.",
+    "description": "Graceful movement. Quiet radiance. Details that feel entirely your own.",
+    "details": "Floral stud with a long stem\nDomed jhumka with fine filigree\nBeaded fringe",
+    "image": "earrings.webp"
+  },
+  {
+    "slug": "ring", "name": "The Ring", "kind": "Ring", "tagline": "For moments that stay.",
+    "description": "A small circle of meaning. Discover a piece that belongs to your story.",
+    "details": "Flower setting with a round stone\nHand-engraved leaf band",
+    "image": "ring.webp"
+  }
+]

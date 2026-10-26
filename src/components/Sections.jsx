@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Heart, ArrowUpRight } from 'lucide-react';
-import { products } from '../data/products.js';
-import { site } from '../data/site.js';
+import { useCollections } from '../collections.jsx';
+import { useSite } from '../settings.jsx';
 import { useStore } from '../store.jsx';
 import Logo from './Logo.jsx';
 
-export const money = (p) => p.price ?? 'Price on enquiry';
+export const money = (p) => p.price_text || 'Price on enquiry';
 
 export function Story() {
+  const site = useSite();
   return (
     <section className="section story" id="story">
       <div className="wrap story__grid">
@@ -27,43 +28,66 @@ export function Story() {
 
 export function ProductCard({ product, index }) {
   const { wish, toggleWish, addToBag } = useStore();
-  const saved = wish.includes(product.id);
+  const saved = wish.includes(product.slug);
   return (
     <article className="card">
-      <a className="card__media" href={`#/piece/${product.id}`} aria-label={`View ${product.name}`}>
-        <img src={product.image} alt={product.alt} loading="lazy" width="880" height="1100" />
-        <span className="card__no">{`0${index + 1}`}</span>
+      <a className="card__media" href={`#/piece/${product.slug}`} aria-label={`View ${product.name}`}>
+        {product.cover_image && <img src={product.cover_image} alt={product.name} loading="lazy" width="880" height="1100" />}
+        <span className="card__no">{String(index + 1).padStart(2, '0')}</span>
       </a>
       <button className={`card__wish${saved ? ' is-on' : ''}`} aria-pressed={saved}
         aria-label={saved ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
-        onClick={() => toggleWish(product.id)}>
+        onClick={() => toggleWish(product.slug)}>
         <Heart size={18} strokeWidth={1.3} fill={saved ? 'currentColor' : 'none'} />
       </button>
       <div className="card__body">
-        <p className="eyebrow">{product.kind}</p>
-        <h3 className="card__name"><a href={`#/piece/${product.id}`}>{product.name}</a></h3>
-        <p className="card__tag">{product.tagline}</p>
+        <p className="eyebrow">{product.kind || 'Collection'}</p>
+        <h3 className="card__name"><a href={`#/piece/${product.slug}`}>{product.name}</a></h3>
+        <p className="card__tag">{product.tagline || product.description}</p>
         <div className="card__row">
           <span className="card__price">{money(product)}</span>
-          <button className="btn-line" onClick={() => addToBag(product.id)}>Add to enquiry</button>
+          <button className="btn-line" onClick={() => addToBag(product.slug)}>Add to enquiry</button>
         </div>
       </div>
     </article>
   );
 }
 
-export function Collection() {
+function CardSkeleton() {
   return (
-    <section className="section collection" id="collection">
+    <div className="card card--skeleton" aria-hidden="true">
+      <div className="card__media" />
+      <div className="card__body"><i /><i /><i /></div>
+    </div>
+  );
+}
+
+export function Collection() {
+  const { status, items, error, retry } = useCollections();
+  return (
+    <section className="section collection" id="collection" aria-busy={status === 'loading'}>
       <div className="wrap">
         <header className="section__head">
           <p className="eyebrow eyebrow--line"><i />The collection</p>
           <h2 className="display display--l">Details that belong to your story.</h2>
-          <p className="lede">Three pieces, imagined in warm gold. Save the ones you love and send us your enquiry.</p>
+          <p className="lede">Save the pieces you love and send us your enquiry.</p>
         </header>
-        <div className="grid">
-          {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-        </div>
+        {status === 'loading' && <div className="grid"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>}
+        {status === 'error' && (
+          <div className="state-box" role="alert">
+            <p>The collection could not be loaded right now.</p>
+            <small>{error}</small>
+            <button className="btn-ghost" onClick={retry}>Try again</button>
+          </div>
+        )}
+        {status === 'ready' && items.length === 0 && (
+          <div className="state-box"><p>New pieces are on their way. Please check back soon.</p></div>
+        )}
+        {status === 'ready' && items.length > 0 && (
+          <div className="grid">
+            {items.map((p, i) => <ProductCard key={p.slug} product={p} index={i} />)}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -72,6 +96,7 @@ export function Collection() {
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export function Visit() {
+  const site = useSite();
   const [email, setEmail] = useState('');
   const [state, setState] = useState({ kind: 'idle', msg: '' });
 
@@ -116,6 +141,7 @@ export function Visit() {
 }
 
 export function Footer() {
+  const site = useSite();
   return (
     <footer className="footer">
       <div className="wrap footer__row">

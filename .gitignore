@@ -3,3 +3,11 @@ dist/
 .env
 .env.*
 !.env.example
+.vercel
+
+# local environment + uploads
+.env
+api/.env
+uploads/*
+!uploads/.htaccess
+!uploads/.gitkeep

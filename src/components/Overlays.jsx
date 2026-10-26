@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Heart, Minus, Plus, Search, Trash2, X } from 'lucide-react';
-import { products } from '../data/products.js';
+import { useCollections } from '../collections.jsx';
 import { useStore } from '../store.jsx';
 import { money } from './Sections.jsx';
 
@@ -61,14 +61,14 @@ export function BagDrawer() {
         <>
           <ul className="lines">
             {bag.map(({ product, qty }) => (
-              <li key={product.id}>
-                <img src={product.image} alt={product.alt} width="72" height="90" />
+              <li key={product.slug}>
+                {product.cover_image && <img src={product.cover_image} alt={product.name} width="72" height="90" />}
                 <div>
-                  <a href={`#/piece/${product.id}`} onClick={() => setPanel(null)}>{product.name}</a>
+                  <a href={`#/piece/${product.slug}`} onClick={() => setPanel(null)}>{product.name}</a>
                   <small>{money(product)}</small>
-                  <Qty value={qty} onChange={(v) => setQty(product.id, v)} />
+                  <Qty value={qty} onChange={(v) => setQty(product.slug, v)} />
                 </div>
-                <button className="icon-btn" aria-label={`Remove ${product.name}`} onClick={() => setQty(product.id, 0)}><Trash2 size={16} strokeWidth={1.3} /></button>
+                <button className="icon-btn" aria-label={`Remove ${product.name}`} onClick={() => setQty(product.slug, 0)}><Trash2 size={16} strokeWidth={1.3} /></button>
               </li>
             ))}
           </ul>
@@ -85,7 +85,8 @@ export function BagDrawer() {
 
 export function WishDrawer() {
   const { wish, toggleWish, addToBag, setPanel } = useStore();
-  const items = products.filter((p) => wish.includes(p.id));
+  const { items: all } = useCollections();
+  const items = all.filter((p) => wish.includes(p.slug));
   return (
     <Shell title={`Wishlist${items.length ? ` (${items.length})` : ''}`} onClose={() => setPanel(null)}>
       {items.length === 0 ? (
@@ -96,14 +97,14 @@ export function WishDrawer() {
       ) : (
         <ul className="lines">
           {items.map((p) => (
-            <li key={p.id}>
-              <img src={p.image} alt={p.alt} width="72" height="90" />
+            <li key={p.slug}>
+              {p.cover_image && <img src={p.cover_image} alt={p.name} width="72" height="90" />}
               <div>
-                <a href={`#/piece/${p.id}`} onClick={() => setPanel(null)}>{p.name}</a>
+                <a href={`#/piece/${p.slug}`} onClick={() => setPanel(null)}>{p.name}</a>
                 <small>{p.tagline}</small>
-                <button className="btn-line" onClick={() => addToBag(p.id)}>Add to enquiry</button>
+                <button className="btn-line" onClick={() => addToBag(p.slug)}>Add to enquiry</button>
               </div>
-              <button className="icon-btn" aria-label={`Remove ${p.name} from wishlist`} onClick={() => toggleWish(p.id)}><Trash2 size={16} strokeWidth={1.3} /></button>
+              <button className="icon-btn" aria-label={`Remove ${p.name} from wishlist`} onClick={() => toggleWish(p.slug)}><Trash2 size={16} strokeWidth={1.3} /></button>
             </li>
           ))}
         </ul>
@@ -114,12 +115,13 @@ export function WishDrawer() {
 
 const PAGES = [
   { id: 'story', label: 'Our Story', href: '#story', hint: 'Trust, blessing and tradition' },
-  { id: 'collection', label: 'The Collection', href: '#collection', hint: 'Necklace, earrings, ring' },
+  { id: 'collection', label: 'The Collection', href: '#collection', hint: 'Our pieces' },
   { id: 'visit', label: 'Visit Tarini', href: '#visit', hint: 'Balasore, Odisha' },
 ];
 
 export function SearchOverlay() {
   const { setPanel } = useStore();
+  const { items: products } = useCollections();
   const [q, setQ] = useState('');
   const close = () => setPanel(null);
   useEscape(close);
@@ -127,10 +129,10 @@ export function SearchOverlay() {
   const hits = useMemo(() => {
     const has = (s) => s.toLowerCase().includes(term);
     return {
-      pieces: products.filter((p) => !term || [p.name, p.kind, p.tagline, p.description, ...p.details].some(has)),
+      pieces: products.filter((p) => !term || [p.name, p.kind, p.tagline, p.description, ...p.details].filter(Boolean).some(has)),
       pages: PAGES.filter((p) => term && [p.label, p.hint].some(has)),
     };
-  }, [term]);
+  }, [term, products]);
   return (
     <div className="overlay overlay--top" onMouseDown={(e) => e.target === e.currentTarget && close()}>
       <div className="search" role="dialog" aria-modal="true" aria-label="Search">
@@ -141,8 +143,8 @@ export function SearchOverlay() {
         </div>
         <ul className="search__list">
           {hits.pieces.map((p) => (
-            <li key={p.id}>
-              <a href={`#/piece/${p.id}`} onClick={close}><img src={p.image} alt="" width="48" height="60" /><span><b>{p.name}</b><small>{p.tagline}</small></span></a>
+            <li key={p.slug}>
+              <a href={`#/piece/${p.slug}`} onClick={close}>{p.cover_image && <img src={p.cover_image} alt="" width="48" height="60" />}<span><b>{p.name}</b><small>{p.tagline}</small></span></a>
             </li>
           ))}
           {hits.pages.map((p) => (
@@ -157,36 +159,57 @@ export function SearchOverlay() {
 
 export function ProductDetail({ id, onClose }) {
   const { wish, toggleWish, addToBag } = useStore();
-  const product = products.find((p) => p.id === id);
+  const { status, items: products } = useCollections();
+  const product = products.find((p) => p.slug === id);
   const [qty, setQty] = useState(1);
-  useEscape(onClose, !!product);
+  const [shot, setShot] = useState(0);
+  useEscape(onClose);
   useEffect(() => { document.body.classList.add('is-locked'); return () => document.body.classList.remove('is-locked'); }, []);
-  if (!product) return null;
-  const saved = wish.includes(product.id);
+  const shell = (children) => (
+    <div className="overlay overlay--page" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>{children}</div>
+  );
+  if (!product) {
+    return shell(
+      <div className="detail detail--empty" role="dialog" aria-modal="true" aria-label="Collection">
+        <button className="icon-btn detail__close" aria-label="Close" onClick={onClose}><X size={22} strokeWidth={1.3} /></button>
+        <p>{status === 'loading' ? 'Loading…' : 'This piece is not available right now.'}</p>
+        {status !== 'loading' && <a className="btn-ghost" href="#collection" onClick={onClose}>Back to the collection</a>}
+      </div>
+    );
+  }
+  const saved = wish.includes(product.slug);
   const idx = products.indexOf(product);
   const next = products[(idx + 1) % products.length];
-  return (
-    <div className="overlay overlay--page" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <article className="detail" role="dialog" aria-modal="true" aria-label={product.name}>
-        <button className="icon-btn detail__close" aria-label="Close" onClick={onClose}><X size={22} strokeWidth={1.3} /></button>
-        <div className="detail__media"><img src={product.image} alt={product.alt} /></div>
-        <div className="detail__info">
-          <p className="eyebrow eyebrow--line"><i />{product.kind} · 0{idx + 1} / 0{products.length}</p>
-          <h2 className="display display--l">{product.tagline}</h2>
-          <h3 className="detail__name">{product.name}</h3>
-          <p className="lede lede--sm">{product.description}</p>
-          <ul className="detail__list">{product.details.map((d) => <li key={d}>{d}</li>)}</ul>
-          <p className="card__price">{money(product)}</p>
-          <div className="detail__buy">
-            <Qty value={qty} onChange={(v) => setQty(Math.max(1, v))} />
-            <button className="btn-solid" onClick={() => { addToBag(product.id, qty); onClose(); }}>Add to enquiry</button>
-            <button className={`icon-btn icon-btn--bordered${saved ? ' is-on' : ''}`} aria-pressed={saved} aria-label={saved ? 'Remove from wishlist' : 'Save to wishlist'} onClick={() => toggleWish(product.id)}>
-              <Heart size={18} strokeWidth={1.3} fill={saved ? 'currentColor' : 'none'} />
-            </button>
-          </div>
-          <a className="btn-text" href={`#/piece/${next.id}`}>Next: {next.name} →</a>
+  const shots = [product.cover_image, ...product.gallery].filter(Boolean);
+  return shell(
+    <article className="detail" role="dialog" aria-modal="true" aria-label={product.name}>
+      <button className="icon-btn detail__close" aria-label="Close" onClick={onClose}><X size={22} strokeWidth={1.3} /></button>
+      <div className="detail__media">
+        {shots[shot] && <img src={shots[shot]} alt={product.name} />}
+        {shots.length > 1 && (
+          <ul className="detail__thumbs">
+            {shots.map((src, i) => (
+              <li key={src}><button className={i === shot ? 'is-on' : ''} aria-label={`Show image ${i + 1}`} aria-pressed={i === shot} onClick={() => setShot(i)}><img src={src} alt="" /></button></li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className="detail__info">
+        <p className="eyebrow eyebrow--line"><i />{product.kind || 'Collection'} · {String(idx + 1).padStart(2, '0')} / {String(products.length).padStart(2, '0')}</p>
+        <h2 className="display display--l">{product.tagline || product.name}</h2>
+        <h3 className="detail__name">{product.name}</h3>
+        {product.description && <p className="lede lede--sm detail__desc">{product.description}</p>}
+        {product.details.length > 0 && <ul className="detail__list">{product.details.map((d) => <li key={d}>{d}</li>)}</ul>}
+        <p className="card__price">{money(product)}</p>
+        <div className="detail__buy">
+          <Qty value={qty} onChange={(v) => setQty(Math.max(1, v))} />
+          <button className="btn-solid" onClick={() => { addToBag(product.slug, qty); onClose(); }}>Add to enquiry</button>
+          <button className={`icon-btn icon-btn--bordered${saved ? ' is-on' : ''}`} aria-pressed={saved} aria-label={saved ? 'Remove from wishlist' : 'Save to wishlist'} onClick={() => toggleWish(product.slug)}>
+            <Heart size={18} strokeWidth={1.3} fill={saved ? 'currentColor' : 'none'} />
+          </button>
         </div>
-      </article>
-    </div>
+        {next && next !== product && <a className="btn-text" href={`#/piece/${next.slug}`}>Next: {next.name} →</a>}
+      </div>
+    </article>
   );
 }

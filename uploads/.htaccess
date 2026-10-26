@@ -1,0 +1,10 @@
+# Uploaded files are images only. Nothing in this folder may ever execute as code.
+Options -Indexes -ExecCGI -Includes
+Require all denied
+<FilesMatch "\.(jpe?g|png|webp)$">
+  Require all granted
+</FilesMatch>
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Cache-Control "public, max-age=604800"
+</IfModule>
