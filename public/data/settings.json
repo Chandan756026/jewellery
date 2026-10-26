@@ -1,0 +1,12 @@
+{
+    "data": {
+        "address": null,
+        "phone": null,
+        "email": null,
+        "hours": null,
+        "instagram": null,
+        "facebook": null,
+        "whatsapp": null,
+        "popups_enabled": true
+    }
+}

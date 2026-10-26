@@ -1,0 +1,24 @@
+{
+    "data": [
+        {
+            "id": 27,
+            "campaign_id": "cmp_762af1297898",
+            "title": "Durga puja",
+            "description": null,
+            "discount_text": "10%",
+            "coupon_code": null,
+            "image": "/uploads/offers/18993d1bd4f390ea5106aae54d9c60cb.jpg",
+            "mobile_image": "/uploads/offers/516bfc7ee1548d849777c94c06769418.jpg",
+            "button_text": null,
+            "button_url": null,
+            "starts_at": "2026-10-26T11:03:00Z",
+            "ends_at": "2026-11-02T11:03:00Z",
+            "popup_enabled": true,
+            "popup_frequency": "session",
+            "display_priority": 0,
+            "min_cart_value": 0,
+            "terms": null
+        }
+    ],
+    "popups_enabled": true
+}

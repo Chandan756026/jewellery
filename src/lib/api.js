@@ -14,10 +14,13 @@ export class ApiError extends Error {
 
 export const setCsrf = (t) => { csrf = t; };
 
-async function parse(res) {
+async function parse(res, path = '') {
   let body = null;
   try { body = await res.json(); } catch { /* non-JSON response */ }
   if (!res.ok) {
+    if (res.status === 404 && body === null && path.startsWith('/auth/')) {
+      throw new ApiError(404, 'The admin needs the PHP backend, which is not available on this site.');
+    }
     const fallback = res.status >= 500 ? 'The server had a problem. Please try again.' : 'The request could not be completed.';
     throw new ApiError(res.status, body?.error?.message || fallback, body?.error?.fields || {}, body?.error?.code || '');
   }
@@ -38,7 +41,7 @@ async function request(path, { method = 'GET', body, signal, retry = true } = {}
     throw new ApiError(0, 'Could not reach the server. Check your connection and that the backend is running.');
   }
   try {
-    return await parse(res);
+    return await parse(res, path);
   } catch (e) {
     if (e.code === 'csrf' && retry) {
       const me = await request('/auth/me', { retry: false });

@@ -1,0 +1,11 @@
+{
+  "rewrites": [
+    { "source": "/api/collections", "destination": "/data/collections.json" },
+    { "source": "/api/offers/active", "destination": "/data/offers.json" },
+    { "source": "/api/settings", "destination": "/data/settings.json" },
+    { "source": "/((?!api/|uploads/|data/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/data/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+    "data": [
+        {
+            "id": 1,
+            "slug": "necklace",
+            "name": "The Necklace",
+            "kind": "Necklace",
+            "tagline": "Grace, in every curve.",
+            "description": "A delicate rhythm of ornament. A beautiful beginning to your own story.",
+            "details": [
+                "Crescent filigree with leaf motifs",
+                "Beaded edge and teardrop pendant",
+                "Fine gold chain"
+            ],
+            "price_text": null,
+            "cover_image": "/uploads/collections/seed-necklace.webp",
+            "gallery": [],
+            "is_featured": false,
+            "display_order": 1,
+            "updated_at": "2026-10-26T10:20:50Z"
+        },
+        {
+            "id": 2,
+            "slug": "earrings",
+            "name": "The Earrings",
+            "kind": "Earrings",
+            "tagline": "A little light. A lasting glow.",
+            "description": "Graceful movement. Quiet radiance. Details that feel entirely your own.",
+            "details": [
+                "Floral stud with a long stem",
+                "Domed jhumka with fine filigree",
+                "Beaded fringe"
+            ],
+            "price_text": null,
+            "cover_image": "/uploads/collections/seed-earrings.webp",
+            "gallery": [],
+            "is_featured": false,
+            "display_order": 2,
+            "updated_at": "2026-10-26T10:20:50Z"
+        },
+        {
+            "id": 3,
+            "slug": "ring",
+            "name": "The Ring",
+            "kind": "Ring",
+            "tagline": "For moments that stay.",
+            "description": "A small circle of meaning. Discover a piece that belongs to your story.",
+            "details": [
+                "Flower setting with a round stone",
+                "Hand-engraved leaf band"
+            ],
+            "price_text": null,
+            "cover_image": "/uploads/collections/seed-ring.webp",
+            "gallery": [],
+            "is_featured": false,
+            "display_order": 3,
+            "updated_at": "2026-10-26T10:20:50Z"
+        }
+    ]
+}

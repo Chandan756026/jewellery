@@ -50,7 +50,7 @@ export function useOfferPopup() {
     };
     try {
       const res = await api.get('/offers/active');
-      skew.current = Date.parse(res.server_time) - Date.now();
+      skew.current = res.server_time ? Date.parse(res.server_time) - Date.now() : 0; // static hosting has no server time
       const live = res.popups_enabled ? res.data.filter((o) => o.popup_enabled && inWindow(o)) : [];
       if (!decided.current) {
         decided.current = true;
