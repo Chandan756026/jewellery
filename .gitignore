@@ -11,3 +11,6 @@ api/.env
 uploads/*
 !uploads/.htaccess
 !uploads/.gitkeep
+
+# generated hosting package (contains a temporary admin password)
+deploy/

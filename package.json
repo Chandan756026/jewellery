@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:api": "node tests/api.test.mjs",
+    "package:host": "node scripts/package-host.mjs",
     "export:static": "node scripts/export-static.mjs"
   },
   "dependencies": {
